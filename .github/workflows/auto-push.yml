@@ -1,36 +1,44 @@
 name: Auto Push
 
 on:
-  workflow_dispatch:
+  workflow_dispatch:  # Manual trigger
 
 jobs:
   push:
     runs-on: ubuntu-latest
 
     permissions:
-      contents: write
+      contents: write  # Required to push
 
     steps:
-    - name: Checkout full repo
-      uses: actions/checkout@v4
-      with:
-        token: ${{ secrets.GITHUB_TOKEN }}
-        fetch-depth: 0
+      - name: Checkout full repo
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 0
 
-    - name: List all files
-      run: find .
+      - name: List all files
+        run: |
+          echo "Current directory:"
+          pwd
+          echo "Files in repo:"
+          ls -R
 
-    - name: Configure git
-      run: |
-        git config user.name "github-actions"
-        git config user.email "actions@github.com"
+      - name: Make file change (example)
+        run: |
+          echo "Log entry at $(date)" >> terraform-autopus/push.log
 
-    - name: Stage all changes
-      run: git add -A
+      - name: Configure Git
+        run: |
+          git config user.name "github-actions"
+          git config user.email "actions@github.com"
 
-    - name: Commit if changes exist
-      run: |
-        git diff --cached --quiet || git commit -m "Auto commit from GitHub Actions"
+      - name: Stage ALL files
+        run: git add -A
 
-    - name: Push changes
-      run: git push
+      - name: Commit if any changes
+        run: |
+          git diff --cached --quiet || git commit -m "Auto commit from GitHub Actions"
+
+      - name: Push
+        run: git push
