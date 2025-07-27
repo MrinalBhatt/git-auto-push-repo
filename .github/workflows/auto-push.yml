@@ -1,37 +1,36 @@
 name: Auto Push
 
 on:
-  workflow_dispatch:  # Trigger manually from GitHub UI
+  workflow_dispatch:
 
 jobs:
   push:
     runs-on: ubuntu-latest
 
-    permissions:  # 👈 REQUIRED for git push
+    permissions:
       contents: write
 
     steps:
-    - name: Checkout repo with write access
+    - name: Checkout full repo
       uses: actions/checkout@v4
       with:
-        token: ${{ secrets.GITHUB_TOKEN }}  # uses GitHub Actions token
-   
-    - name: Make file change
-      run: |
-        echo "Auto push from GitHub Actions at $(date)" >> auto_push_log.txt
+        token: ${{ secrets.GITHUB_TOKEN }}
+        fetch-depth: 0
 
-    - name: Commit and push changes
+    - name: List all files
+      run: find .
+
+    - name: Configure git
       run: |
         git config user.name "github-actions"
         git config user.email "actions@github.com"
-    - name: Debug before git add
+
+    - name: Stage all changes
+      run: git add -A
+
+    - name: Commit if changes exist
       run: |
-        git status
-        ls -la
-    - name: Debug after git add
-      run: |
-        git add .
-        git status
-        git commit -m "Auto commit from GitHub Actions" || echo "Nothing to commit"
-        git push
-   
+        git diff --cached --quiet || git commit -m "Auto commit from GitHub Actions"
+
+    - name: Push changes
+      run: git push
