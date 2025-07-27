@@ -1,0 +1,24 @@
+name: Auto Push
+
+on:
+  workflow_dispatch:  # Manual trigger
+
+jobs:
+  push:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repo
+      uses: actions/checkout@v4
+
+    - name: Make file change
+      run: |
+        echo "Auto push from GitHub Actions at $(date)" >> auto_push_log.txt
+
+    - name: Commit and push changes
+      run: |
+        git config user.name "github-actions"
+        git config user.email "actions@github.com"
+        git add .
+        git commit -m "Auto commit from GitHub Actions"
+        git push
